@@ -11,7 +11,7 @@
 #   deadline   — no external source at all. Pure date arithmetic over the
 #                `deadline` fields already present in mappings.yaml.
 
-version: "0.1.0"
+version: "0.1.1"
 
 defaults:
   interval: weekly
