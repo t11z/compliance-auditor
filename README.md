@@ -16,11 +16,11 @@ From the marketplace (recommended):
 
 ```
 /plugin marketplace add t11z/compliance-auditor
-/plugin install compliance-audit@sprock
+/plugin install compliance-audit@t11z
 ```
 
 `t11z/compliance-auditor` is the GitHub repository that hosts the marketplace;
-`@sprock` is the marketplace name declared in `.claude-plugin/marketplace.json`.
+`@t11z` is the marketplace name declared in `.claude-plugin/marketplace.json`.
 
 Installing gives you three components:
 
@@ -35,7 +35,7 @@ To try a clone before it is published, add the checkout directory as a marketpla
 ```
 git clone https://github.com/t11z/compliance-auditor
 /plugin marketplace add ./compliance-auditor
-/plugin install compliance-audit@sprock
+/plugin install compliance-audit@t11z
 ```
 
 Validate the manifest and component frontmatter with:

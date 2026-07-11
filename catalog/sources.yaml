@@ -11,12 +11,12 @@
 #   deadline   — no external source at all. Pure date arithmetic over the
 #                `deadline` fields already present in mappings.yaml.
 
-version: "0.1.0"
+version: "0.1.1"
 
 defaults:
   interval: weekly
   timeout_seconds: 60
-  user_agent: "compliance-auditor/0.1 (+https://github.com/sprock-systems/compliance-auditor)"
+  user_agent: "compliance-auditor/0.1 (+https://github.com/t11z/compliance-auditor)"
 
 sources:
 

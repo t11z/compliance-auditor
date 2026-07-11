@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://sprock.systems/schema/compliance/change-record/v1.json",
+  "$id": "https://github.com/t11z/compliance-auditor/schema/compliance/change-record/v1.json",
   "title": "Change Record",
   "description": "Output of scripts/watch.py. Deterministic: it says THAT something moved and WHERE, never what it means. Interpretation is the curator's job and produces a pull request, not a catalog mutation.",
   "type": "object",
