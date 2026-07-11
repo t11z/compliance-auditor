@@ -1,4 +1,4 @@
-# compliance-audit
+# compliance-auditor
 
 Audits code, IaC and runtime configuration against German and EU regulatory
 frameworks (BSI IT-Grundschutz, Cyber Resilience Act, GDPR). Ships as a Claude Code
@@ -16,7 +16,7 @@ From the marketplace (recommended):
 
 ```
 /plugin marketplace add t11z/compliance-auditor
-/plugin install compliance-audit@t11z
+/plugin install compliance-auditor@t11z
 ```
 
 `t11z/compliance-auditor` is the GitHub repository that hosts the marketplace;
@@ -35,7 +35,7 @@ To try a clone before it is published, add the checkout directory as a marketpla
 ```
 git clone https://github.com/t11z/compliance-auditor
 /plugin marketplace add ./compliance-auditor
-/plugin install compliance-audit@t11z
+/plugin install compliance-auditor@t11z
 ```
 
 Validate the manifest and component frontmatter with:
