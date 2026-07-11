@@ -1,0 +1,13 @@
+{
+  "name": "compliance-audit",
+  "version": "0.1.0",
+  "description": "Audits code, IaC and runtime configuration against German and EU regulatory frameworks (BSI IT-Grundschutz, Cyber Resilience Act, GDPR). Frameworks project n:m onto an evidence-primitive layer. Emits canonical JSON; the report is rendered deterministically from it. Makes no conformity statement — the schema has no field for one.",
+  "author": {
+    "name": "Thomas",
+    "url": "https://github.com/t11z"
+  },
+  "homepage": "https://github.com/t11z/compliance-auditor",
+  "repository": "https://github.com/t11z/compliance-auditor",
+  "license": "MIT",
+  "keywords": ["compliance", "bsi", "grundschutz", "cra", "dsgvo", "gdpr", "nis2", "audit", "sbom"]
+}

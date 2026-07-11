@@ -1,0 +1,48 @@
+name: release
+
+# The plugin version is the catalog version. A tag is therefore a statement about
+# the assessment basis, not just about code. Consumers pin to it deliberately;
+# autoUpdate is off by design (see docs/decisions/0003).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Tag matches manifest
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          man=$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          [ "$tag" = "$man" ] || { echo "tag $tag != manifest $man"; exit 1; }
+          echo "version $man"
+
+      - name: Validate plugin
+        run: npx -y @anthropic-ai/claude-code@latest plugin validate .
+
+      - name: Catalog diff since last release
+        id: notes
+        run: |
+          prev=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          {
+            echo "## Catalog"
+            if [ -n "$prev" ]; then
+              git diff --stat "$prev"..HEAD -- catalog/ || echo "no catalog change"
+            else
+              echo "initial release"
+            fi
+            echo ""
+            echo "Consumers: this release changes the assessment basis. Verdicts may move"
+            echo "without your code changing. Pin deliberately."
+          } > NOTES.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: NOTES.md
