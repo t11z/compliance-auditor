@@ -12,7 +12,7 @@ Dieser Bericht trifft **keine Konformitaetsaussage**. Er weist ausschliesslich a
 |---|---|
 | Lauf-ID | `9f2c1a44-8b3e-4d16-9c07-5a1e2b7d0f31` |
 | Zeitraum | 2026-07-11T08:14:02Z – 2026-07-11T08:16:41Z |
-| Repository | `git@github.com:sprock-systems/kenny.git` |
+| Repository | `git@github.com:example-org/kenny.git` |
 | Commit | `4c1f9ae7d2b8` (main) |
 | IaC-Pfade | infra/terraform |
 | Cloud-Scope | GCP `organizations/412887330219` (Credentials: read-only) |

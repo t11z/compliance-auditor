@@ -18,7 +18,7 @@
   },
 
   "target": {
-    "repo": "git@github.com:sprock-systems/kenny.git",
+    "repo": "git@github.com:example-org/kenny.git",
     "commit_sha": "4c1f9ae7d2b83a06e5c1147fbb2d9e0a3c7185df",
     "branch": "main",
     "iac_paths": ["infra/terraform"],

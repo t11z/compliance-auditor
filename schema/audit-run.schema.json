@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://sprock.systems/schema/compliance/audit-run/v1.json",
+  "$id": "https://github.com/t11z/compliance-auditor/schema/compliance/audit-run/v1.json",
   "title": "Compliance Audit Run",
   "description": "Kanonisches Ergebnisdokument eines Compliance-Audit-Laufs. Einzige Wahrheitsquelle: der Markdown-Report wird deterministisch hieraus gerendert und nie separat generiert.",
   "type": "object",

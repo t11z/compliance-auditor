@@ -16,7 +16,7 @@ version: "0.1.0"
 defaults:
   interval: weekly
   timeout_seconds: 60
-  user_agent: "compliance-auditor/0.1 (+https://github.com/sprock-systems/compliance-auditor)"
+  user_agent: "compliance-auditor/0.1 (+https://github.com/t11z/compliance-auditor)"
 
 sources:
 
