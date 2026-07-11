@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r .maintenance/requirements.txt
+
+      # The plugin manifest must be loadable by Claude Code at all.
+      - name: Validate plugin
+        run: npx -y @anthropic-ai/claude-code@latest plugin validate .
+
+      # Gate 1 — the plugin version IS the catalog version.
+      - name: Version sync
+        if: github.event_name == 'pull_request'
+        run: python .maintenance/scripts/check_version_sync.py origin/${{ github.base_ref }}
+
+      # Gate 2 — replay the catalog against the frozen evidence bundle. A verdict
+      # that flips without the evidence changing is either intended or invented.
+      - name: Golden run regression
+        run: |
+          python .maintenance/scripts/replay.py .maintenance/golden/bundle-ref --out /tmp/actual.json
+          python .maintenance/scripts/golden_diff.py /tmp/actual.json
+
+      # Gate 3 — nothing under .maintenance/ may be declared as a shipped component.
+      # A curator running from a consumer's plugin cache would patch a catalog that
+      # the next /plugin update overwrites: a silent no-op the user believes worked.
+      - name: Maintenance stays unshipped
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          c = json.load(open(".claude-plugin/plugin.json"))["components"]
+          bad = [p for paths in c.values() for p in paths if ".maintenance" in p]
+          if bad:
+              print(f"maintenance paths declared as components: {bad}"); sys.exit(1)
+          print("ok: components =", c)
+          PY
+
+      - run: python -m pytest .maintenance/tests -q

@@ -1,0 +1,126 @@
+name: catalog-watch
+
+# Change detection against the regulatory sources, weekly.
+#
+# The workflow can open a pull request. It can never push to main and it can
+# never merge. The catalog is the basis on which code is judged; a self-mutating
+# catalog makes `catalog_version` meaningless and every past verdict
+# unreproducible. See docs/decisions/0002.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"     # Monday 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.watch.outputs.has_changes }}
+      unreachable: ${{ steps.watch.outputs.unreachable }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r .maintenance/requirements.txt
+
+      - name: Detect changes
+        id: watch
+        run: |
+          set +e
+          python .maintenance/scripts/watch.py --write-state --out change-record.json
+          code=$?
+          set -e
+          n=$(jq '.changes | length' change-record.json)
+          u=$(jq '.unreachable | length' change-record.json)
+          echo "has_changes=$([ "$n" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "unreachable=$([ "$u" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "watch.py exit=$code changes=$n unreachable=$u"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: change-record
+          path: change-record.json
+
+  # An unreachable source is not "no changes". Silently treating it as green is
+  # exactly how a compliance gate becomes decorative.
+  alert-unreachable:
+    needs: detect
+    if: needs.detect.outputs.unreachable == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: change-record
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const rec = JSON.parse(fs.readFileSync('change-record.json', 'utf8'));
+            const body = [
+              'One or more regulatory sources could not be reached. The catalog was **not**',
+              'updated and its staleness clock keeps running.',
+              '',
+              ...rec.unreachable.map(u => `- \`${u.source_id}\`: ${u.error}`),
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'catalog-watch: source unreachable',
+              body,
+              labels: ['catalog', 'watch-failure'],
+            });
+
+  curate:
+    needs: detect
+    if: needs.detect.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: change-record
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Curate
+        uses: anthropics/claude-code-action@e90deca47693f9457b72f2b53c17d7c445a87342 # v1.0.171
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          prompt: |
+            Read change-record.json and act as the catalog-curator subagent
+            defined in .maintenance/agents/catalog-curator.md. Follow its hard rules
+            without exception.
+
+            You may only open a pull request. You may not merge. You may not
+            modify anything under golden/.
+
+            If a change is real but its consequence for the catalog is unclear,
+            open the PR with `unclear` filled in and the label
+            needs-domain-decision. Do not guess.
+
+            For publication-type changes (EDPB, BGBl, OJ), open an issue rather
+            than a PR. Those are legal decisions, not editorial ones.
+          allowed_tools: "Read,Grep,Glob,Edit,Bash(python:*),Bash(git:*),WebFetch"
+
+  # Even if the curator produced nothing, the gates must hold on its PR.
+  # This job runs on the PR itself, via ci.yml.

@@ -1,0 +1,16 @@
+{
+  "name": "sprock",
+  "description": "Regulatory compliance auditing plugins for BSI IT-Grundschutz, the Cyber Resilience Act and GDPR.",
+  "owner": {
+    "name": "Thomas",
+    "url": "https://github.com/t11z"
+  },
+  "plugins": [
+    {
+      "name": "compliance-audit",
+      "source": "./",
+      "description": "Compliance audit against BSI IT-Grundschutz, Cyber Resilience Act and GDPR. Evidence-primitive layer, deterministic report rendering, no conformity claim.",
+      "strict": true
+    }
+  ]
+}
