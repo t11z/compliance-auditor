@@ -44,7 +44,7 @@ jobs:
           echo "unreachable=$([ "$u" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "watch.py exit=$code changes=$n unreachable=$u"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: change-record
           path: change-record.json
